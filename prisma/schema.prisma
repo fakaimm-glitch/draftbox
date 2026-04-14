@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  handle    String?  @unique
+  bio       String?
+  image     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  posts     Post[]
+}
+
+model Post {
+  id          String     @id @default(cuid())
+  content     String
+  status      PostStatus @default(DRAFT)
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  media       Media[]
+  platform    String?
+  publishedAt DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([userId])
+}
+
+model Media {
+  id        String    @id @default(cuid())
+  url       String
+  publicId  String?
+  type      MediaType
+  postId    String
+  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+
+  @@index([postId])
+}
+
+enum PostStatus {
+  DRAFT
+  READY
+  PUBLISHED
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+}
